@@ -1,0 +1,42 @@
+[gd_scene load_steps=6 format=3 uid="uid://lsu858yvaswd"]
+
+[ext_resource type="PackedScene" uid="uid://dj1137ma426k8" path="res://logic/ui/game_input.tscn" id="1_4rtpd"]
+[ext_resource type="Script" path="res://logic/ui/map_editor.gd" id="1_j3yxc"]
+[ext_resource type="TileSet" uid="uid://b6taw5w4s7s5i" path="res://assets/resources/game/tiles.tres" id="2_44dmf"]
+[ext_resource type="PackedScene" uid="uid://hds34errxgf3" path="res://logic/ui/map_editor_ui.tscn" id="5_63t8i"]
+[ext_resource type="Script" path="res://logic/game/maps/map.gd" id="5_b0ipg"]
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="GameInput" parent="." instance=ExtResource("1_4rtpd")]
+position = Vector2(496, 496)
+zoom = Vector2(1, 1)
+
+[node name="MapEditor" type="Node2D" parent="." node_paths=PackedStringArray("camera", "map")]
+script = ExtResource("1_j3yxc")
+camera = NodePath("../GameInput")
+map = NodePath("../Map")
+
+[node name="TileMap" type="TileMap" parent="MapEditor"]
+visible = false
+tile_set = ExtResource("2_44dmf")
+format = 2
+
+[node name="Map" type="Node2D" parent="."]
+script = ExtResource("5_b0ipg")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="UI" parent="CanvasLayer" instance=ExtResource("5_63t8i")]
+tile_set = ExtResource("2_44dmf")
+
+[connection signal="input_dragging" from="GameInput" to="MapEditor" method="_on_game_input_dragging"]
+[connection signal="resize_map" from="CanvasLayer/UI" to="MapEditor" method="_on_ui_resize_map"]
+[connection signal="select_terrain" from="CanvasLayer/UI" to="MapEditor" method="_on_ui_select_terrain"]

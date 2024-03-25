@@ -1,10 +1,11 @@
 class_name GameInput
 extends Camera2D
 
-signal input_first
-signal input_second
+signal input_first(terrain: Terrain)
+signal input_second(terrain: Terrain)
 signal input_escape
 signal selection_changed(terrain: Terrain)
+signal input_dragging(terrain: Terrain)
 
 @onready var cursor: Cursor = $Decouple/Cursor
 @onready var selection: Selection = $Decouple/Selection
@@ -67,6 +68,8 @@ func _process(delta: float) -> void:
 	if not input_enabled:
 		return
 	_handle_camera_input(delta)
+	#if _can_drag_emit and Input.is_action_pressed("select_first"):
+		
 
 
 func _handle_camera_input(delta: float) -> void:
@@ -87,8 +90,11 @@ func _unhandled_input(event: InputEvent) -> void:
 	if button_enabled:
 		if event.is_action_pressed("select_first"):
 			is_just_first = true
+			input_first.emit(selection.last_terrain)
+			input_dragging.emit(selection.last_terrain)
 		if event.is_action_pressed("select_second"):
 			is_just_second = true
+			input_second.emit(selection.last_terrain)
 		if event.is_action_pressed("escape"):
 			is_just_escape = true
 	if zoom_enabled:
@@ -101,5 +107,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			_target_camera_zoom = zoom + _camera_zoom_speed * Vector2.ONE
 			tween.tween_property(self, "zoom", _target_camera_zoom, 0.1)
 
+
 func _on_selection_changed(terrain: Terrain) -> void:
 	selection_changed.emit(terrain)
+	if button_enabled and Input.is_action_pressed("select_first"):
+		input_dragging.emit(terrain)
